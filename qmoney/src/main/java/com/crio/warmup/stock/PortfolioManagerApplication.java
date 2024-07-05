@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -46,18 +47,21 @@ public class PortfolioManagerApplication {
 
   public static List<String> mainReadFile(String[] args) throws IOException, URISyntaxException {
 
-     return Collections.emptyList();
-  }
+    String file = args[0];
+    File input = resolveFileFromResources(file);
+    PortfolioTrade[] portfolioTrade = getObjectMapper().readValue(input,PortfolioTrade[].class);
 
+    List<String> listOfSymbol = new ArrayList<>();
+
+    for (PortfolioTrade trade : portfolioTrade) {
+      listOfSymbol.add(trade.getSymbol());
+    }
+    return listOfSymbol;
+  }
 
   // Note:
   // 1. You may need to copy relevant code from #mainReadQuotes to parse the Json.
   // 2. Remember to get the latest quotes from Tiingo API.
-
-
-
-
-
 
   // Note:
   // 1. You may have to register on Tiingo to get the api_token.
@@ -73,7 +77,7 @@ public class PortfolioManagerApplication {
     ObjectMapper mapper = new ObjectMapper();
     logger.info(mapper.writeValueAsString(object));
   }
-
+  //method is used to locate and convert a file from the resources directory of a Java project into a File object. 
   private static File resolveFileFromResources(String filename) throws URISyntaxException {
     return Paths.get(
         Thread.currentThread().getContextClassLoader().getResource(filename).toURI()).toFile();
@@ -117,10 +121,10 @@ public class PortfolioManagerApplication {
   public static List<String> debugOutputs() {
 
      String valueOfArgument0 = "trades.json";
-     String resultOfResolveFilePathArgs0 = "";
-     String toStringOfObjectMapper = "";
-     String functionNameFromTestFileInStackTrace = "";
-     String lineNumberFromTestFileInStackTrace = "";
+     String resultOfResolveFilePathArgs0 = "/home/crio-user/workspace/adityaingale176-ME_QMONEY_V2/qmoney/bin/main/trades.json";
+     String toStringOfObjectMapper = "com.fasterxml.jackson.databind.ObjectMapper@6150c3ec";
+     String functionNameFromTestFileInStackTrace = "mainReadFile()";
+     String lineNumberFromTestFileInStackTrace = "148";
 
 
     return Arrays.asList(new String[]{valueOfArgument0, resultOfResolveFilePathArgs0,
@@ -139,9 +143,6 @@ public class PortfolioManagerApplication {
     ThreadContext.put("runId", UUID.randomUUID().toString());
 
     printJsonObject(mainReadFile(args));
-
-
-
   }
 }
 
