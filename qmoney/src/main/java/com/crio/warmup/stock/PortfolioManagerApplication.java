@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.logging.log4j.ThreadContext;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 
@@ -44,6 +45,7 @@ public class PortfolioManagerApplication {
   //  Note:
   //  1. There can be few unused imports, you will need to fix them to make the build pass.
   //  2. You can use "./gradlew build" to check if your code builds successfully.
+  public static String token = "5c3d523ad33c6ae66e05e30863483ac58d875e2c";
 
   public static List<String> mainReadFile(String[] args) throws IOException, URISyntaxException {
 
@@ -62,6 +64,11 @@ public class PortfolioManagerApplication {
   // Note:
   // 1. You may need to copy relevant code from #mainReadQuotes to parse the Json.
   // 2. Remember to get the latest quotes from Tiingo API.
+
+
+  // TODO: CRIO_TASK_MODULE_REST_API
+  //  Find out the closing price of each stock on the end_date and return the list
+  //  of all symbols in ascending order by its close value on end date.
 
   // Note:
   // 1. You may have to register on Tiingo to get the api_token.
@@ -135,14 +142,78 @@ public class PortfolioManagerApplication {
 
   // Note:
   // Remember to confirm that you are getting same results for annualized returns as in Module 3.
+  public static List<String> mainReadQuotes(String[] args) throws IOException, URISyntaxException {
 
+    List<PortfolioTrade> trades = readTradesFromJson(args[0]);
+    List<TotalReturnsDto> dtos = new ArrayList<>();
+    List<String> resultArray = new ArrayList<>();
+    RestTemplate restTemplate = new RestTemplate();
+
+    //Extracting candles and extracting dtos based on closing price
+    for (PortfolioTrade trade : trades){
+      String url = prepareUrl(trade, LocalDate.parse(args[1]), token);
+      TiingoCandle[] candles= restTemplate.getForObject(url, TiingoCandle[].class);
+      dtos.add(new TotalReturnsDto(trade.getSymbol(), candles[candles.length-1].getClose()));
+    }
+    //sorting dtos based on closing price using comparator 
+    Collections.sort(dtos, new ClosingPriceComparator());
+
+    //fetching array of symbols from dtos
+    for (TotalReturnsDto dto : dtos){
+      resultArray.add(dto.getSymbol());
+    }
+    //return the response
+    return resultArray;
+  }
+
+  // TODO:
+  //  After refactor, make sure that the tests pass by using these two commands
+  //  ./gradlew test --tests PortfolioManagerApplicationTest.readTradesFromJson
+  //  ./gradlew test --tests PortfolioManagerApplicationTest.mainReadFile
+  public static List<PortfolioTrade> readTradesFromJson(String filename) throws IOException, URISyntaxException {
+     ObjectMapper objectmapper = getObjectMapper();
+     File file = resolveFileFromResources(filename);
+     PortfolioTrade [] trades = objectmapper.readValue(file, PortfolioTrade[].class);
+     return Arrays.asList(trades);
+     
+  }
+
+
+  // TODO:
+  //  Build the Url using given parameters and use this function in your code to cann the API.
+  public static String prepareUrl(PortfolioTrade trade, LocalDate endDate, String token) {
+    if (trade.getPurchaseDate().isAfter(endDate)){
+      throw new RuntimeException();
+    }
+    String url = "https://api.tiingo.com/tiingo/daily/"+trade.getSymbol()+"/pricestartDate=?"+trade.getPurchaseDate()+"&endDate=2016-1-1&token="+token;
+    System.out.print("url by aditya:"+ url);
+    return url;
+  }
 
 
   public static void main(String[] args) throws Exception {
     Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler());
     ThreadContext.put("runId", UUID.randomUUID().toString());
 
-    printJsonObject(mainReadFile(args));
+
+    printJsonObject(mainReadQuotes(args));
+
+
   }
 }
 
+class ClosingPriceComparator implements Comparator<TotalReturnsDto>{
+
+  @Override
+  public int compare(TotalReturnsDto dto1, TotalReturnsDto dto2) {
+    
+    if (dto1.getClosingPrice()>dto2.getClosingPrice()){
+      return 1; 
+    }
+    else if (dto1.getClosingPrice() < dto2.getClosingPrice()){
+      return -1;
+    }
+    return 0;
+  }
+  
+}
