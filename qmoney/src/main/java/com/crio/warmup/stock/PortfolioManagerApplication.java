@@ -185,7 +185,7 @@ public class PortfolioManagerApplication {
     if (trade.getPurchaseDate().isAfter(endDate)){
       throw new RuntimeException();
     }
-    String url = "https://api.tiingo.com/tiingo/daily/"+trade.getSymbol()+"/pricestartDate=?"+trade.getPurchaseDate()+"&endDate=2016-1-1&token="+token;
+    String url = "https://api.tiingo.com/tiingo/daily/"+trade.getSymbol()+"/prices?startDate="+trade.getPurchaseDate()+"&endDate="+endDate+"&token="+token;
     System.out.print("url by aditya:"+ url);
     return url;
   }
