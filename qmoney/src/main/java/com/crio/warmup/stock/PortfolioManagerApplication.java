@@ -299,8 +299,3 @@ class ClosingPriceComparator implements Comparator<TotalReturnsDto>{
   
 }
 
-
-
-
-  
-
