@@ -16,7 +16,7 @@ import org.springframework.web.client.RestTemplate;
 
 public class PortfolioManagerImpl implements PortfolioManager {
 
-  public String token = "5c3d523ad33c6ae66e05e30863483ac58d875e2c";
+  public String token = "fed3acf3bd538c62e9bf8140692cb5413b31a7a1";
 
   public String getToken(){
     return token;

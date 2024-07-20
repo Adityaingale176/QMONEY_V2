@@ -48,7 +48,8 @@ public class PortfolioManagerApplication {
   //  Note:
   //  1. There can be few unused imports, you will need to fix them to make the build pass.
   //  2. You can use "./gradlew build" to check if your code builds successfully.
-  public static String token = "5c3d523ad33c6ae66e05e30863483ac58d875e2c";
+  public static String token = "fed3acf3bd538c62e9bf8140692cb5413b31a7a1";
+  
 
   public static String getToken(){
     return token;
